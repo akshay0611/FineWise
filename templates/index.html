@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>FinWise - Community Finance App</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Optional: Link to custom CSS -->
+    <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <!-- logo -->
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1170/1170576.png">
+
+</head>
+<body class="container py-5">
+    <h2 class="mb-4">Welcome, {{ current_user.id }}!</h2>
+
+    <a href="{{ url_for('export') }}" class="btn btn-secondary" style="float:right;">⬇ Export CSV</a>
+    <a href="{{ url_for('logout') }}" class="btn btn-secondary" style="float:left;">🚪 Logout</a>
+
+    <h1 class="text-center mb-4">💡 FinWise</h1>
+    <h5 class="text-center text-muted">Smart Budgeting + Daily Financial Wisdom</h5>
+
+    <div class="mt-4 p-3 bg-light border rounded">
+        <h3>💰 Current Balance: ₹{{ balance }}</h3>
+        <p><strong>📘 Daily Tip:</strong> {{ tip }}</p>
+    </div>
+
+    <form action="/add" method="POST" class="mt-4">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <input name="amount" type="number" step="0.01" class="form-control" placeholder="Amount (₹)" required>
+            </div>
+            <div class="col-md-4">
+                <input name="category" type="text" class="form-control" placeholder="Category (e.g., Rent, Food)" required>
+            </div>
+            <div class="col-md-4">
+                <select name="type" class="form-select">
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                </select>
+            </div>
+        </div>
+        <button class="btn btn-success mt-3">Add Entry</button>
+    </form>
+    <div class="mt-5">
+        <h4>📜 All Transactions</h4>
+        <ul class="list-group">
+            {% for item in data %}
+                <li class="list-group-item d-flex justify-content-between">
+                    <span>
+                        {{ item.type.title() }} - ₹{{ item.amount }} 
+                        <small class="text-muted">({{ item.category }})</small>
+                    </span>
+                </li>
+            {% else %}
+                <li class="list-group-item text-muted">No transactions yet.</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% if data %}
+        <div class="mt-5 text-center">
+            <h5>📊 Expense Breakdown</h5>
+            <canvas id="expenseChart" width="500" height="500" style="width:500px; height:500px;"></canvas>
+        </div>
+
+        <div class="mt-5">
+            <h4>💼 Smart Budget Planner</h4>
+            <div class="table-responsive">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Suggested Budget</th>
+                            <th>Spent This Month</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="budget-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+    {% endif %}
+    <footer class="text-center mt-5 text-muted">
+        <p>Made with ❤️ for HackSphere Community Finance Hackathon</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        let chart = null;
+
+        function fetchDataAndRender() {
+            fetch('/data')
+                .then(r => r.json())
+                .then(({data}) => {
+                    // --- existing pie chart rendering logic ---
+                    const expenses = data.filter(e => e.type === 'expense');
+                    const labels   = [...new Set(expenses.map(e => e.category))];
+                    const values   = labels.map(cat =>
+                        expenses.filter(e => e.category===cat)
+                                .reduce((s,e)=>s+e.amount,0)
+                    );
+                    const chartData = {
+                        labels,
+                        datasets:[{
+                            data: values,
+                            backgroundColor: labels.map((_,i)=>`hsl(${i*360/labels.length},70%,50%)`)
+                        }]
+                    };
+                    if (chart) {
+                        chart.data = chartData;
+                        chart.update();
+                    } else {
+                        chart = new Chart(ctx, {
+                            type: 'pie',
+                            data: chartData,
+                            options: {
+                                responsive: false,
+                                maintainAspectRatio: false,
+                                plugins: { legend:{ position:'bottom' } }
+                            }
+                        });
+                    }
+                    renderBudgetPlanner(data);
+                });
+        }
+        fetchDataAndRender();
+
+        // ... existing AJAX‐form and export logic ...
+
+        // --- Smart Budget Planner renderer ---
+        function renderBudgetPlanner(data) {
+            const today = new Date();
+            // 1) Count distinct month‐keys
+            const monthSet = new Set();
+            data.forEach(e => {
+                if (e.date) {
+                    const d = new Date(e.date);
+                    monthSet.add(`${d.getFullYear()}-${d.getMonth()+1}`);
+                }
+            });
+            const monthsCount = monthSet.size || 1;
+
+            // 2) Tally totals and this‐month sums
+            const total = {}, current = {};
+            data.forEach(e => {
+                if (e.type==='expense' && e.date) {
+                    const d = new Date(e.date), cat = e.category;
+                    total[cat] = (total[cat]||0) + e.amount;
+                    if (d.getFullYear()===today.getFullYear() && d.getMonth()===today.getMonth()) {
+                        current[cat] = (current[cat]||0) + e.amount;
+                    }
+                }
+            });
+
+            // 3) Render table body
+            const tbody = document.getElementById('budget-table-body');
+            tbody.innerHTML = '';
+            if (!Object.keys(total).length) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted">No expenses recorded yet.</td></tr>';
+                return;
+            }
+            Object.keys(total).forEach(cat => {
+                const avg   = total[cat]/monthsCount;
+                const spent = current[cat] || 0;
+                const over  = spent > avg;
+                const row = `
+                    <tr>
+                        <td>${cat}</td>
+                        <td>₹${avg.toFixed(2)}</td>
+                        <td>₹${spent.toFixed(2)}</td>
+                        <td><span class="badge ${over?'bg-danger':'bg-success'}">
+                            ${over?'Over':'Under'}
+                        </span></td>
+                    </tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+    });
+    </script>
+</body>
+</html>

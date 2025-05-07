@@ -1,0 +1,17 @@
+body {
+    background-color: #f9fbfc;
+}
+
+h1 {
+    color: #007bff;
+    font-weight: bold;
+}
+
+form input, form select {
+    border-radius: 8px;
+}
+
+footer {
+    margin-top: 60px;
+    font-size: 0.9rem;
+}
