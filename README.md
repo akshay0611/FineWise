@@ -100,16 +100,6 @@ Password: admin123
 
 8.Suggesting new ideas
 
-# 📃 License
-This project is open-source under the MIT License.
-
-# 📞 Contact
-Have questions or suggestions?
-
-📧 Email: yourname@example.com
-🔗 LinkedIn: YourLinkedIn
-🐙 GitHub: YourGitHub
-
 
 
 
