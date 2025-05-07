@@ -54,9 +54,9 @@ Open your browser and go to http://127.0.0.1:5000/
 # 🧪 Sample Login Credentials (For Testing)
 You can log in using:
 
-Username: testuser
+Username: admin
 
-Password: test123
+Password: admin123
 
 (These can be changed in the users.json file.)
 
