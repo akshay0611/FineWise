@@ -1,21 +1,453 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - FinWise</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --primary-light: #c7d2fe;
+            --secondary: #0ea5e9;
+            --accent: #14b8a6;
+            --dark: #1e293b;
+            --light: #f8fafc;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            background-color: var(--light);
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .page-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: linear-gradient(-45deg, #f0fdfa, #eff6ff, #eef2ff, #f5f3ff);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            z-index: -2;
+        }
+        
+        .shape {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.4;
+        }
+        
+        .shape-1 {
+            top: -80px;
+            right: -80px;
+            width: 500px;
+            height: 500px;
+            border-radius: 58% 42% 38% 62% / 42% 55% 45% 58%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            animation: morph 15s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            bottom: -150px;
+            left: -100px;
+            width: 400px;
+            height: 400px;
+            border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            background: linear-gradient(45deg, var(--accent), var(--secondary));
+            animation: morph 12s ease-in-out infinite alternate;
+        }
+        
+        .shape-3 {
+            top: 40%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            border-radius: 30% 70% 70% 30% / 30% 52% 48% 70%;
+            background-color: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            transform: translate(-50%, -50%);
+            animation: spin 20s linear infinite;
+        }
+        
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            margin: auto;
+            padding: 20px;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .login-card {
+            backdrop-filter: blur(16px);
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        .login-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15);
+        }
+        
+        .card-header {
+            padding: 0;
+            position: relative;
+            background: none;
+            border: none;
+        }
+        
+        .header-bg {
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-bg::before {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.15);
+            transform: rotate(-45deg);
+            top: -80px;
+            left: -50px;
+        }
+        
+        .header-bg::after {
+            content: '';
+            position: absolute;
+            width: 150%;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            transform: rotate(-45deg);
+            top: 20px;
+            left: -20px;
+        }
+        
+        .brand-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-top: -50px;
+            margin-bottom: 20px;
+        }
+        
+        .brand-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+            position: relative;
+            z-index: 2;
+            border: 5px solid white;
+        }
+        
+        .brand-logo-inner {
+            width: 80%;
+            height: 80%;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .brand-text {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        
+        .brand-name {
+            font-weight: 700;
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+            margin-bottom: 0;
+        }
+        
+        .login-heading {
+            font-weight: 600;
+            font-size: 1.6rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .login-tagline {
+            color: #64748b;
+            font-size: 1rem;
+            font-weight: 300;
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .login-tagline::after {
+            content: '';
+            position: absolute;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .form-control {
+            height: 55px;
+            border-radius: 12px;
+            padding: 10px 20px 10px 50px;
+            font-size: 0.95rem;
+            border: 2px solid #e2e8f0;
+            background-color: white;
+            transition: all 0.25s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(79, 70, 229, 0.15);
+        }
+        
+        .input-icon {
+            position: absolute;
+            top: 50%;
+            left: 15px;
+            transform: translateY(-50%);
+            color: #94a3b8;
+            font-size: 1.2rem;
+            transition: all 0.25s ease;
+            pointer-events: none;
+        }
+        
+        .form-control:focus + .input-icon {
+            color: var(--primary);
+        }
+        
+        .btn-login {
+            height: 55px;
+            font-weight: 600;
+            font-size: 1rem;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn-login::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--primary) 100%);
+            transition: all 0.4s ease;
+            z-index: -1;
+        }
+        
+        .btn-login:hover::before {
+            left: 0;
+        }
+        
+        .btn-login:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.4);
+        }
+        
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border-left: 4px solid var(--danger);
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: #b91c1c;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .error-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
+            color: var(--danger);
+        }
+        
+        .card-body {
+            padding: 30px;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #64748b;
+        }
+        
+        @keyframes gradient {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+        
+        @keyframes morph {
+            0% {
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            }
+            50% {
+                border-radius: 30% 60% 70% 40% / 50% 60% 30% 60%;
+            }
+            100% {
+                border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+            }
+        }
+        
+        @keyframes spin {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 10px;
+            }
+            
+            .card-body {
+                padding: 20px;
+            }
+            
+            .header-bg {
+                height: 80px;
+            }
+            
+            .brand-logo {
+                width: 80px;
+                height: 80px;
+            }
+            
+            .brand-name {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
 </head>
 <body>
     {% if current_user.is_authenticated %}
         <script>window.location = "{{ url_for('index') }}";</script>
     {% endif %}
 
-    <h2>Login</h2>
-    <form method="POST" action="{{ url_for('login') }}">
-        <input type="text" name="username" placeholder="Username" required><br><br>
-        <input type="password" name="password" placeholder="Password" required><br><br>
-        <button type="submit">Login</button>
-    </form>
-    {% if error %}
-        <p style="color:red;">{{ error }}</p>
-    {% endif %}
+    <div class="page-background"></div>
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+    
+    <div class="login-container">
+        <div class="login-card">
+            <div class="card-header">
+                <div class="header-bg"></div>
+                <div class="brand-wrapper">
+                    <div class="brand-logo">
+                        <div class="brand-logo-inner">
+                            <i class="bi bi-piggy-bank-fill"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card-body">
+                <div class="brand-text">
+                    <h1 class="brand-name">FinWise</h1>
+                </div>
+                
+                <h2 class="login-heading text-center">Welcome Back</h2>
+                <p class="login-tagline text-center">Take control of your money before it starts controlling you.</p>
+                
+                <form method="POST" action="{{ url_for('login') }}">
+                    <div class="form-group">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                        <span class="input-icon">
+                            <i class="bi bi-person-fill"></i>
+                        </span>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                        <span class="input-icon">
+                            <i class="bi bi-lock-fill"></i>
+                        </span>
+                    </div>
+                    <button type="submit" class="btn btn-login w-100">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+                    </button>
+                </form>
+                
+                {% if error %}
+                    <div class="error-message">
+                        <span class="error-icon">
+                            <i class="bi bi-exclamation-circle-fill"></i>
+                        </span>
+                        <span>{{ error }}</span>
+                    </div>
+                {% endif %}
+                
+                <div class="login-footer">
+                    FinWise — Smart financial management for your future
+                </div>
+            </div>
+        </div>
+    </div>
+
+   
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
